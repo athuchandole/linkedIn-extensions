@@ -2,135 +2,215 @@
 <html>
 
 <head>
-    <title>LinkedIn Sheet Dashboard</title>
+    <title>LinkedIn Admin Dashboard</title>
     <meta charset="UTF-8">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial;
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        .sidebar {
+            position: fixed;
+            width: 220px;
+            height: 100vh;
+            background: #1f2937;
+            color: white;
             padding: 20px;
-            background: #f3f6f8;
         }
 
-        h2 {
-            margin-bottom: 10px;
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 30px;
         }
 
-        .stats {
-            margin-bottom: 15px;
-            font-size: 14px;
-            font-weight: bold;
+        .sidebar p {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .main {
+            margin-left: 220px;
+            padding: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 15px 0;
+            font-size: 22px;
         }
 
         .controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 10px;
         }
 
         input,
-        select,
-        button {
-            padding: 6px 8px;
+        select {
+            padding: 8px;
             font-size: 13px;
-        }
-
-        button {
-            cursor: pointer;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            border: none;
         }
 
-        .primary {
-            background: #0a66c2;
-            color: white;
-        }
-
-        .danger {
-            background: #d93025;
-            color: white;
+        .stats {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #374151;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
         }
 
         th,
         td {
-            border: 1px solid #ddd;
-            padding: 6px;
+            padding: 10px;
             font-size: 13px;
+            border-bottom: 1px solid #eee;
             text-align: left;
         }
 
         th {
-            background: #0a66c2;
+            background: #111827;
             color: white;
             position: sticky;
             top: 0;
         }
 
         tbody tr:hover {
-            background: #f1f1f1;
+            background: #f9fafb;
+        }
+
+        .highlight {
+            background: yellow;
+            font-weight: bold;
+        }
+
+        .action-cell {
+            text-align: right;
+            width: 60px;
+        }
+
+        .deleteRow {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .footer-actions {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 4px;
+            border: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .danger {
+            background: #dc2626;
+            color: white;
         }
     </style>
 </head>
 
 <body>
 
-    <h2>LinkedIn Profiles Dashboard</h2>
-
-    <div class="stats" id="stats"></div>
-
-    <div class="controls">
-
-        <select id="filterType">
-            <option value="all">All</option>
-            <option value="email">Has Email</option>
-            <option value="phone">Has Phone</option>
-            <option value="both">Has Both</option>
-            <option value="none">No Contact</option>
-        </select>
-
-        <input type="text" id="searchName" placeholder="Search by name">
-        <input type="text" id="searchDomain" placeholder="Search by email domain">
-
-        <select id="sortType">
-            <option value="latest">Latest Added</option>
-            <option value="oldest">Oldest Added</option>
-            <option value="az">Name A-Z</option>
-            <option value="za">Name Z-A</option>
-            <option value="emailFirst">Has Email First</option>
-            <option value="phoneFirst">Has Phone First</option>
-            <option value="bothFirst">Has Both First</option>
-        </select>
-
-        <button id="btnCSV" class="primary">Export CSV</button>
-        <button id="btnExcel" class="primary">Export Excel</button>
-        <button id="btnJSON" class="primary">Export JSON</button>
-        <button id="btnPDF" class="primary">Export PDF</button>
-        <button id="btnCopy" class="primary">Copy All</button>
-        <button id="btnDeleteSelected" class="danger">Delete Selected</button>
-        <button id="btnDeleteAll" class="danger">Delete All</button>
-
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <p>LinkedIn Profile Manager</p>
     </div>
 
-    <table id="fullTable">
-        <thead>
-            <tr>
-                <th><input type="checkbox" id="selectAll"></th>
-                <th>Name</th>
-                <th>Headline</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Profile URL</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="main">
+
+        <div class="card">
+            <h1>Profiles Dashboard</h1>
+
+            <div class="stats" id="stats"></div>
+
+            <div class="controls">
+                <select id="filterType">
+                    <option value="all">All</option>
+                    <option value="email">Has Email</option>
+                    <option value="phone">Has Phone</option>
+                    <option value="both">Has Both</option>
+                    <option value="none">No Contact</option>
+                </select>
+
+                <input type="text" id="searchName" placeholder="Search by name">
+                <input type="text" id="searchDomain" placeholder="Search by email domain">
+
+                <select id="sortType">
+                    <option value="latest">Latest Added</option>
+                    <option value="oldest">Oldest Added</option>
+                    <option value="az">Name A-Z</option>
+                    <option value="za">Name Z-A</option>
+                    <option value="emailFirst">Has Email First</option>
+                    <option value="phoneFirst">Has Phone First</option>
+                    <option value="bothFirst">Has Both First</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card">
+
+            <table id="fullTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>Name</th>
+                        <th>Headline</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Profile URL</th>
+                        <th class="action-cell">Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="footer-actions">
+                <button id="btnCSV" class="btn primary">Export CSV</button>
+                <button id="btnExcel" class="btn primary">Export Excel</button>
+                <button id="btnJSON" class="btn primary">Export JSON</button>
+                <button id="btnPDF" class="btn primary">Export PDF</button>
+                <button id="btnCopy" class="btn primary">Copy All</button>
+                <button id="btnDeleteSelected" class="btn danger">Delete Selected</button>
+                <button id="btnDeleteAll" class="btn danger">Delete All</button>
+            </div>
+
+        </div>
+
+    </div>
 
     <script src="sheet.js"></script>
 

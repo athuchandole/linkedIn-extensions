@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadProfiles();
 
-    // Filters
     document.getElementById("filterType").addEventListener("change", renderTable);
     document.getElementById("searchName").addEventListener("input", renderTable);
     document.getElementById("searchDomain").addEventListener("input", renderTable);
@@ -19,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .forEach(cb => cb.checked = e.target.checked);
     });
 
-    // Buttons
     document.getElementById("btnCSV").addEventListener("click", exportCSV);
     document.getElementById("btnExcel").addEventListener("click", exportExcel);
     document.getElementById("btnJSON").addEventListener("click", exportJSON);
@@ -36,6 +34,12 @@ function loadProfiles() {
     });
 }
 
+function highlight(text, search) {
+    if (!text || !search) return text || "";
+    const regex = new RegExp(`(${search})`, "gi");
+    return text.replace(regex, `<span class="highlight">$1</span>`);
+}
+
 function renderTable() {
     tableBody.innerHTML = "";
     let data = [...profilesData];
@@ -45,7 +49,6 @@ function renderTable() {
     const domainSearch = document.getElementById("searchDomain").value.toLowerCase();
     const sort = document.getElementById("sortType").value;
 
-    // Filter
     data = data.filter(p => {
         if (filter === "email" && !p.email) return false;
         if (filter === "phone" && !p.phone) return false;
@@ -58,7 +61,6 @@ function renderTable() {
         return true;
     });
 
-    // Sort
     switch (sort) {
         case "latest": data.reverse(); break;
         case "az": data.sort((a, b) => a.name.localeCompare(b.name)); break;
@@ -74,13 +76,22 @@ function renderTable() {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td><input type="checkbox" class="rowCheckbox" data-url="${profile.profileUrl}"></td>
-            <td>${profile.name || ""}</td>
+            <td>${highlight(profile.name || "", nameSearch)}</td>
             <td>${profile.headline || ""}</td>
-            <td>${profile.email || ""}</td>
+            <td>${highlight(profile.email || "", domainSearch)}</td>
             <td>${profile.phone || ""}</td>
             <td><a href="${profile.profileUrl}" target="_blank">Open</a></td>
+            <td class="action-cell">
+                <button class="deleteRow" data-url="${profile.profileUrl}">🗑️</button>
+            </td>
         `;
         tableBody.appendChild(row);
+    });
+
+    document.querySelectorAll(".deleteRow").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            deleteSingle(e.target.dataset.url);
+        });
     });
 
     updateStats();
@@ -96,37 +107,34 @@ function updateStats() {
         `Total: ${total} | With Email: ${email} | With Phone: ${phone} | With Both: ${both}`;
 }
 
+function deleteSingle(url) {
+    profilesData = profilesData.filter(p => p.profileUrl !== url);
+    chrome.storage.local.set({ [STORAGE_KEY]: profilesData }, loadProfiles);
+}
+
 function getSelected() {
     const selectedUrls = [...document.querySelectorAll(".rowCheckbox:checked")]
         .map(cb => cb.dataset.url);
 
     if (selectedUrls.length === 0) return filteredData;
-
     return profilesData.filter(p => selectedUrls.includes(p.profileUrl));
 }
-
-/* ================= EXPORT ================= */
 
 function exportCSV() {
     const data = getSelected();
     if (!data.length) return alert("No data selected");
-
-    const csv = convertToCSV(data);
-    downloadFile(csv, "profiles.csv", "text/csv");
+    downloadFile(convertToCSV(data), "profiles.csv", "text/csv");
 }
 
 function exportExcel() {
     const data = getSelected();
     if (!data.length) return alert("No data selected");
-
-    const csv = convertToCSV(data);
-    downloadFile(csv, "profiles.xls", "application/vnd.ms-excel");
+    downloadFile(convertToCSV(data), "profiles.xls", "application/vnd.ms-excel");
 }
 
 function exportJSON() {
     const data = getSelected();
     if (!data.length) return alert("No data selected");
-
     downloadFile(JSON.stringify(data, null, 2), "profiles.json", "application/json");
 }
 
@@ -138,12 +146,9 @@ function exportPDF() {
 function copyAll() {
     const data = getSelected();
     if (!data.length) return alert("No data selected");
-
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
     alert("Copied successfully");
 }
-
-/* ================= DELETE ================= */
 
 function deleteSelected() {
     const selected = getSelected();
@@ -158,12 +163,9 @@ function deleteSelected() {
 
 function deleteAll() {
     if (!confirm("Delete all profiles?")) return;
-
     profilesData = [];
     chrome.storage.local.set({ [STORAGE_KEY]: [] }, loadProfiles);
 }
-
-/* ================= HELPERS ================= */
 
 function convertToCSV(data) {
     const header = ["Name", "Headline", "Email", "Phone", "Profile URL"];
