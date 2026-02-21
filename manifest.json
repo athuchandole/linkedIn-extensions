@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Profile Extractor",
-  "version": "1.4",
-  "description": "Extracts LinkedIn profile info and displays a profile card (without image).",
+  "version": "1.5",
+  "description": "Automatically extracts LinkedIn profile info and displays a profile card.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://www.linkedin.com/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Extract Profile Data"
+    "default_title": "LinkedIn Profile Data"
   },
   "content_scripts": [
     {

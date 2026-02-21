@@ -2,7 +2,6 @@ function waitForElement(selector, timeout = 5000) {
     return new Promise((resolve) => {
         const interval = 100;
         let elapsed = 0;
-
         const check = () => {
             const el = document.querySelector(selector);
             if (el) return resolve(el);
@@ -18,10 +17,11 @@ async function getProfileData() {
     const nameEl = await waitForElement('h1');
     const headlineEl = await waitForElement('.text-body-medium, .pv-text-details__left-panel .text-body-medium');
 
+    if (!nameEl && !headlineEl) return null; // Not a profile page
+
     const name = nameEl?.innerText?.trim() || "Not found";
     const headline = headlineEl?.innerText?.trim() || "Not found";
 
-    // Email & phone (only if visible)
     let email = "Not found";
     let phone = "Not found";
     const pageText = document.body.innerText;
