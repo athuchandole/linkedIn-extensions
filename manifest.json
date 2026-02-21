@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Profile Extractor",
-  "version": "3.0",
+  "version": "4.0",
   "description": "Extract and save LinkedIn profile information.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": ["https://www.linkedin.com/*"],
@@ -12,6 +12,12 @@
     {
       "matches": ["https://www.linkedin.com/*"],
       "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sheet.html", "sheet.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
