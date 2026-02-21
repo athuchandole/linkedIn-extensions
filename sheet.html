@@ -10,6 +10,10 @@
             background: #f3f6f8;
         }
 
+        h2 {
+            margin-bottom: 20px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -21,11 +25,26 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
+            font-size: 14px;
         }
 
         th {
             background: #0a66c2;
             color: white;
+        }
+
+        .delete-btn {
+            background: #d93025;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -42,6 +61,7 @@
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Profile URL</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody></tbody>
