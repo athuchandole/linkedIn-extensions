@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Profile Extractor",
-  "version": "1.5",
-  "description": "Automatically extracts LinkedIn profile info and displays a profile card.",
+  "version": "1.6",
+  "description": "Automatically extracts LinkedIn profile info including email and phone.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://www.linkedin.com/*"],
   "action": {
