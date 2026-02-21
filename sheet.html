@@ -2,16 +2,54 @@
 <html>
 
 <head>
-    <title>All Stored Profiles</title>
+    <title>LinkedIn Sheet Dashboard</title>
+    <meta charset="UTF-8">
+
     <style>
         body {
             font-family: Arial;
-            padding: 30px;
+            padding: 20px;
             background: #f3f6f8;
         }
 
         h2 {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 6px 8px;
+            font-size: 13px;
+        }
+
+        button {
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+        }
+
+        .primary {
+            background: #0a66c2;
+            color: white;
+        }
+
+        .danger {
+            background: #d93025;
+            color: white;
         }
 
         table {
@@ -23,51 +61,79 @@
         th,
         td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
+            font-size: 13px;
             text-align: left;
-            font-size: 14px;
         }
 
         th {
             background: #0a66c2;
             color: white;
+            position: sticky;
+            top: 0;
         }
 
-        .delete-btn {
-            background: #d93025;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-
-        .delete-btn:hover {
-            opacity: 0.9;
+        tbody tr:hover {
+            background: #f1f1f1;
         }
     </style>
 </head>
 
 <body>
 
-    <h2>All Stored LinkedIn Profiles</h2>
+    <h2>LinkedIn Profiles Dashboard</h2>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="controls">
+
+        <select id="filterType">
+            <option value="all">All</option>
+            <option value="email">Has Email</option>
+            <option value="phone">Has Phone</option>
+            <option value="both">Has Both</option>
+            <option value="none">No Contact</option>
+        </select>
+
+        <input type="text" id="searchName" placeholder="Search by name">
+        <input type="text" id="searchDomain" placeholder="Search by email domain">
+
+        <select id="sortType">
+            <option value="latest">Latest Added</option>
+            <option value="oldest">Oldest Added</option>
+            <option value="az">Name A-Z</option>
+            <option value="za">Name Z-A</option>
+            <option value="emailFirst">Has Email First</option>
+            <option value="phoneFirst">Has Phone First</option>
+            <option value="bothFirst">Has Both First</option>
+        </select>
+
+        <button id="btnCSV" class="primary">Export CSV</button>
+        <button id="btnExcel" class="primary">Export Excel</button>
+        <button id="btnJSON" class="primary">Export JSON</button>
+        <button id="btnPDF" class="primary">Export PDF</button>
+        <button id="btnCopy" class="primary">Copy All</button>
+        <button id="btnDeleteSelected" class="danger">Delete Selected</button>
+        <button id="btnDeleteAll" class="danger">Delete All</button>
+
+    </div>
 
     <table id="fullTable">
         <thead>
             <tr>
+                <th><input type="checkbox" id="selectAll"></th>
                 <th>Name</th>
                 <th>Headline</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Profile URL</th>
-                <th>Action</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
     <script src="sheet.js"></script>
+
 </body>
 
 </html>
