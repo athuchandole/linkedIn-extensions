@@ -2,18 +2,40 @@
 <html>
 
 <head>
-    <title>LinkedIn Profile Extractor</title>
-    <link rel="stylesheet" href="popup.css">
+    <title>Profile Extractor</title>
+    <link rel="stylesheet" href="popup.css" />
 </head>
 
 <body>
-    <div id="profileCard">
-        <div id="output" class="hidden"></div>
-        <div id="message" class="hidden">
-            <div>Not a LinkedIn profile page.</div>
-            <button id="reloadBtn">🔄 Reload</button>
+
+    <div class="container">
+        <div class="header">
+            <h2>LinkedIn Profile</h2>
+            <button id="reloadBtn" title="Reload">⟳</button>
+        </div>
+
+        <div id="profileContainer">
+            <p class="loading">Loading profile data...</p>
+        </div>
+
+        <button id="addToSheetBtn" class="sheet-btn" disabled>Add to Sheet</button>
+
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Headline</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Profile URL</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
+
     <script src="popup.js"></script>
 </body>
 

@@ -1,35 +1,63 @@
-function showProfile(data) {
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerHTML = `
-        <div class="profile-name">${data.name}</div>
-        <div class="profile-headline">${data.headline}</div>
-        <div class="profile-info"><span class="label">Email:</span> ${data.email}</div>
-        <div class="profile-info"><span class="label">Phone:</span> ${data.phone}</div>
-        <div class="profile-info"><span class="label">Profile URL:</span> <a href="${data.profileUrl}" target="_blank">${data.profileUrl}</a></div>
-    `;
-    outputDiv.classList.remove("hidden");
-    document.getElementById("message").classList.add("hidden");
+const profileContainer = document.getElementById("profileContainer");
+const reloadBtn = document.getElementById("reloadBtn");
+const addToSheetBtn = document.getElementById("addToSheetBtn");
+const tableBody = document.querySelector("#dataTable tbody");
+
+let currentProfileData = null;
+
+function renderProfile(data) {
+    profileContainer.innerHTML = `
+    <div class="profile-card">
+      <div class="profile-name">${data.name || "-"}</div>
+      <div class="profile-headline">${data.headline || "-"}</div>
+      <div class="profile-field"><strong>Email:</strong> ${data.email || "-"}</div>
+      <div class="profile-field"><strong>Phone:</strong> ${data.phone || "-"}</div>
+      <div class="profile-field"><strong>Profile URL:</strong> ${data.profileUrl || "-"}</div>
+    </div>
+  `;
+
+    addToSheetBtn.disabled = false;
+    currentProfileData = data;
 }
 
-function showMessage() {
-    document.getElementById("output").classList.add("hidden");
-    document.getElementById("message").classList.remove("hidden");
+function renderError() {
+    profileContainer.innerHTML = `
+    <div class="profile-card">
+      <p>No profile data found.</p>
+      <p>Please open a LinkedIn profile page.</p>
+    </div>
+  `;
+    addToSheetBtn.disabled = true;
 }
 
-function fetchProfile() {
-    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-        chrome.tabs.sendMessage(tab.id, { action: "extractProfile" }, (response) => {
-            if (!response) {
-                showMessage();
-            } else {
-                showProfile(response);
+function loadProfile() {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "getProfileData" }, function (response) {
+            if (chrome.runtime.lastError || !response) {
+                renderError();
+                return;
             }
+
+            renderProfile(response);
         });
     });
 }
 
-// Reload button
-document.getElementById("reloadBtn").addEventListener("click", fetchProfile);
+addToSheetBtn.addEventListener("click", () => {
+    if (!currentProfileData) return;
 
-// Auto-fetch on popup open
-fetchProfile();
+    const row = document.createElement("tr");
+    row.innerHTML = `
+    <td>${currentProfileData.name || ""}</td>
+    <td>${currentProfileData.headline || ""}</td>
+    <td>${currentProfileData.email || ""}</td>
+    <td>${currentProfileData.phone || ""}</td>
+    <td><a href="${currentProfileData.profileUrl}" target="_blank">Link</a></td>
+  `;
+
+    tableBody.appendChild(row);
+});
+
+reloadBtn.addEventListener("click", loadProfile);
+
+document.addEventListener("DOMContentLoaded", loadProfile);

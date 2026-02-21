@@ -1,17 +1,17 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Profile Extractor",
-  "version": "1.6",
-  "description": "Automatically extracts LinkedIn profile info including email and phone.",
+  "version": "2.0",
+  "description": "Extract and save LinkedIn profile information.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://www.linkedin.com/*"],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "LinkedIn Profile Data"
+    "default_title": "Profile Extractor"
   },
   "content_scripts": [
     {
-      "matches": ["https://www.linkedin.com/in/*"],
+      "matches": ["https://www.linkedin.com/*"],
       "js": ["content.js"]
     }
   ]

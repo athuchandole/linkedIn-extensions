@@ -1,72 +1,64 @@
-function waitForElement(selector, timeout = 7000) {
-    return new Promise((resolve, reject) => {
-        const start = Date.now();
-        const timer = setInterval(() => {
-            const el = document.querySelector(selector);
-            if (el) {
-                clearInterval(timer);
-                resolve(el);
-            }
-            if (Date.now() - start > timeout) {
-                clearInterval(timer);
-                reject("Timeout waiting for element: " + selector);
-            }
-        }, 200);
-    });
-}
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "getProfileData") {
+        extractProfileData().then(data => {
+            sendResponse(data);
+        });
+        return true;
+    }
+});
 
-async function getContactInfo() {
-    // Find "Contact Info" button
+async function extractProfileData() {
+
+    const name =
+        document.querySelector("h1")?.innerText?.trim() || null;
+
+    const headline =
+        document.querySelector(".text-body-medium")?.innerText?.trim() || null;
+
+    const profileUrl = window.location.href;
+
+    let email = null;
+    let phone = null;
+
+    const waitFor = (selector, timeout = 7000) =>
+        new Promise((resolve, reject) => {
+            const start = Date.now();
+            const timer = setInterval(() => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    clearInterval(timer);
+                    resolve(el);
+                }
+                if (Date.now() - start > timeout) {
+                    clearInterval(timer);
+                    reject();
+                }
+            }, 200);
+        });
+
     const contactBtn = [...document.querySelectorAll("a, button")]
         .find(el => el.innerText?.trim().toLowerCase() === "contact info");
 
-    if (!contactBtn) return { email: "Not found", phone: "Not found" };
+    if (contactBtn) {
+        contactBtn.click();
 
-    // Click to open overlay
-    contactBtn.click();
+        try {
+            await waitFor("section.pv-contact-info__contact-type");
 
-    try {
-        await waitForElement("section.pv-contact-info__contact-type");
-    } catch (err) {
-        return { email: "Not found", phone: "Not found" };
+            email =
+                document.querySelector("a[href^='mailto:']")?.innerText?.trim() || null;
+
+            phone =
+                [...document.querySelectorAll("section")]
+                    .find(s => s.querySelector("h3")?.innerText?.toLowerCase().includes("phone"))
+                    ?.querySelector("span.t-14")?.innerText?.trim() || null;
+
+            document.querySelector("button[aria-label='Dismiss']")?.click();
+
+        } catch (err) {
+            console.log("Contact info not accessible");
+        }
     }
 
-    const email = document.querySelector("a[href^='mailto:']")?.innerText?.trim() || "Not found";
-    const phone = [...document.querySelectorAll("section")]
-        .find(s => s.querySelector("h3")?.innerText?.toLowerCase().includes("phone"))
-        ?.querySelector("span.t-14")?.innerText?.trim() || "Not found";
-
-    // Close overlay
-    document.querySelector("button[aria-label='Dismiss']")?.click();
-
-    return { email, phone };
+    return { name, headline, email, phone, profileUrl };
 }
-
-async function getProfileData() {
-    // Wait for name and headline
-    const nameEl = await waitForElement('h1', 5000);
-    const headlineEl = await waitForElement('.text-body-medium, .pv-text-details__left-panel .text-body-medium', 5000);
-
-    if (!nameEl && !headlineEl) return null; // Not a profile page
-
-    const name = nameEl?.innerText?.trim() || "Not found";
-    const headline = headlineEl?.innerText?.trim() || "Not found";
-
-    const contact = await getContactInfo();
-
-    return {
-        name,
-        headline,
-        email: contact.email,
-        phone: contact.phone,
-        profileUrl: window.location.href
-    };
-}
-
-// Listen to popup requests
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "extractProfile") {
-        getProfileData().then(data => sendResponse(data));
-    }
-    return true;
-});
