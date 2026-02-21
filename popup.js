@@ -7,6 +7,27 @@ const tableBody = document.querySelector("#dataTable tbody");
 let currentProfileData = null;
 const STORAGE_KEY = "linkedin_profiles";
 
+/* ---------- STRONG PROFILE URL CHECK ---------- */
+
+function isValidProfilePage(url) {
+    if (!url) return false;
+
+    try {
+        const parsed = new URL(url);
+
+        if (!parsed.hostname.includes("linkedin.com")) return false;
+
+        // Match /in/username OR /pub/username
+        const profileRegex = /^\/(in|pub)\/[a-zA-Z0-9\-_%]+\/?$/;
+
+        return profileRegex.test(parsed.pathname);
+    } catch {
+        return false;
+    }
+}
+
+/* ---------- RENDER PROFILE ---------- */
+
 function renderProfile(data) {
     profileContainer.innerHTML = `
     <div class="profile-card">
@@ -17,19 +38,27 @@ function renderProfile(data) {
       <div><strong>Profile URL:</strong> ${data.profileUrl || "-"}</div>
     </div>
   `;
+
+    addToSheetBtn.style.display = "block";
     addToSheetBtn.disabled = false;
     currentProfileData = data;
 }
 
+/* ---------- ERROR ---------- */
+
 function renderError() {
     profileContainer.innerHTML = `
     <div class="profile-card">
-      <p>No profile data found.</p>
-      <p>Please open a LinkedIn profile page.</p>
+      <p>Not a LinkedIn profile page.</p>
+      <p>Please open a valid profile like /in/username</p>
     </div>
   `;
-    addToSheetBtn.disabled = true;
+
+    addToSheetBtn.style.display = "none";
+    currentProfileData = null;
 }
+
+/* ---------- TABLE ---------- */
 
 function addRowToTable(data) {
     const row = document.createElement("tr");
@@ -49,14 +78,19 @@ function loadStoredProfiles() {
 
         tableBody.innerHTML = "";
 
-        // Show only latest 3 (latest on top)
         const latestThree = profiles.slice(-3).reverse();
-
         latestThree.forEach(profile => addRowToTable(profile));
     });
 }
 
+/* ---------- SAVE PROFILE ---------- */
+
 function saveProfile(profile) {
+    if (!profile || !profile.profileUrl || !profile.name) {
+        alert("Invalid profile data.");
+        return;
+    }
+
     chrome.storage.local.get([STORAGE_KEY], (result) => {
         const profiles = result[STORAGE_KEY] || [];
 
@@ -66,28 +100,41 @@ function saveProfile(profile) {
             return;
         }
 
-        profiles.push(profile); // push keeps order
+        profiles.push(profile);
+
         chrome.storage.local.set({ [STORAGE_KEY]: profiles }, () => {
-            loadStoredProfiles(); // refresh table
+            loadStoredProfiles();
         });
     });
 }
 
+/* ---------- LOAD PROFILE ---------- */
+
 function loadProfile() {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        const currentUrl = tabs[0]?.url;
+
+        if (!isValidProfilePage(currentUrl)) {
+            renderError();
+            return;
+        }
+
         chrome.tabs.sendMessage(
             tabs[0].id,
             { action: "getProfileData" },
             function (response) {
-                if (chrome.runtime.lastError || !response) {
+                if (chrome.runtime.lastError || !response || !response.name) {
                     renderError();
                     return;
                 }
+
                 renderProfile(response);
             }
         );
     });
 }
+
+/* ---------- EVENTS ---------- */
 
 addToSheetBtn.addEventListener("click", () => {
     if (!currentProfileData) return;
@@ -101,6 +148,7 @@ openSheetBtn.addEventListener("click", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+    addToSheetBtn.style.display = "none";
     loadProfile();
     loadStoredProfiles();
 });
