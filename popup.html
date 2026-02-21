@@ -1,32 +1,19 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>LinkedIn Extractor</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            width: 300px;
-            padding: 10px;
-        }
-        button {
-            padding: 8px;
-            width: 100%;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .data {
-            font-size: 13px;
-            word-wrap: break-word;
-        }
-        .label {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <button id="extractBtn">Extract Profile Data</button>
-    <div class="data" id="output"></div>
 
+<head>
+    <title>LinkedIn Profile Extractor</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div id="profileCard">
+        <div id="placeholder">
+            <button id="extractBtn">Extract Profile Data</button>
+        </div>
+        <div id="output" class="hidden"></div>
+    </div>
     <script src="popup.js"></script>
 </body>
+
 </html>

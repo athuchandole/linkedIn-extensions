@@ -3,16 +3,20 @@ document.getElementById("extractBtn").addEventListener("click", async () => {
 
     chrome.tabs.sendMessage(tab.id, { action: "extractProfile" }, (response) => {
         if (!response) {
-            document.getElementById("output").innerHTML = "No profile data found. Make sure you're on a LinkedIn profile page.";
+            alert("No profile data found. Make sure you're on a LinkedIn profile page.");
             return;
         }
 
-        document.getElementById("output").innerHTML = `
-            <div><span class="label">Name:</span> ${response.name}</div>
-            <div><span class="label">Headline:</span> ${response.headline}</div>
-            <div><span class="label">Email:</span> ${response.email}</div>
-            <div><span class="label">Phone:</span> ${response.phone}</div>
-            <div><span class="label">Profile URL:</span> ${response.profileUrl}</div>
+        const outputDiv = document.getElementById("output");
+        outputDiv.innerHTML = `
+            <div class="profile-name">${response.name}</div>
+            <div class="profile-headline">${response.headline}</div>
+            <div class="profile-info"><span class="label">Email:</span> ${response.email}</div>
+            <div class="profile-info"><span class="label">Phone:</span> ${response.phone}</div>
+            <div class="profile-info"><span class="label">Profile URL:</span> <a href="${response.profileUrl}" target="_blank">${response.profileUrl}</a></div>
         `;
+
+        document.getElementById("placeholder").classList.add("hidden");
+        outputDiv.classList.remove("hidden");
     });
 });

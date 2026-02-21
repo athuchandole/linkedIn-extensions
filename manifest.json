@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Profile Extractor",
-  "version": "1.0",
-  "description": "Extracts visible LinkedIn profile information (name, headline, contact info).",
+  "version": "1.4",
+  "description": "Extracts LinkedIn profile info and displays a profile card (without image).",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://www.linkedin.com/*"],
   "action": {
