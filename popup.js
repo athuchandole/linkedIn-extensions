@@ -9,7 +9,7 @@ const statusMessage = document.getElementById("statusMessage");
 let currentProfileData = null;
 const STORAGE_KEY = "linkedin_profiles";
 
-/* ---------- PROFILE URL CHECK (FIXED & STRONG) ---------- */
+/* ---------- PROFILE URL CHECK ---------- */
 
 function isValidProfilePage(url) {
     if (!url) return false;
@@ -17,17 +17,12 @@ function isValidProfilePage(url) {
     try {
         const parsed = new URL(url);
 
-        // Must be linkedin domain
         if (!parsed.hostname.includes("linkedin.com")) return false;
 
-        // Clean pathname (remove trailing slash)
         const path = parsed.pathname.replace(/\/$/, "");
-
-        // Accept numeric usernames properly
         const profileRegex = /^\/(in|pub)\/[a-zA-Z0-9\-_%]+$/;
 
         return profileRegex.test(path);
-
     } catch (error) {
         return false;
     }
@@ -41,7 +36,7 @@ function checkIfAlreadyAdded(profileUrl) {
         const exists = profiles.some(p => p.profileUrl === profileUrl);
 
         if (exists) {
-            statusMessage.textContent = "Already added in sheet ✅";
+            statusMessage.textContent = "Added in Sheet";
             statusMessage.classList.add("success");
             addToSheetBtn.disabled = true;
         } else {
@@ -57,17 +52,25 @@ function checkIfAlreadyAdded(profileUrl) {
 function renderProfile(data) {
     profileContainer.innerHTML = `
         <div class="profile-card">
-            <div class="profile-name"><strong>${data.name || "-"}</strong></div>
+            <div class="profile-name">${data.name || "-"}</div>
             <div class="profile-headline">${data.headline || "-"}</div>
-            <div><strong>Email:</strong> ${data.email || "-"}</div>
-            <div><strong>Phone:</strong> ${data.phone || "-"}</div>
-            <div><strong>Profile URL:</strong> ${data.profileUrl || "-"}</div>
+
+            <div class="contact-info">
+                <div class="contact-label">Email</div>
+                <div class="contact-value">${data.email || "-"}</div>
+
+                <div class="contact-label">Phone</div>
+                <div class="contact-value">${data.phone || "-"}</div>
+            </div>
+
+            <div class="profile-url">
+                ${data.profileUrl || "-"}
+            </div>
         </div>
     `;
 
     addToSheetBtn.style.display = "block";
     currentProfileData = data;
-
     checkIfAlreadyAdded(data.profileUrl);
 }
 
@@ -76,7 +79,7 @@ function renderProfile(data) {
 function renderError() {
     profileContainer.innerHTML = `
         <div class="profile-card">
-            <p>Not a LinkedIn profile page.</p>
+            <p><strong>Not a LinkedIn profile page.</strong></p>
             <p>Please open a valid profile like /in/username</p>
         </div>
     `;
