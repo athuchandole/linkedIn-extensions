@@ -4,6 +4,7 @@ const addToSheetBtn = document.getElementById("addToSheetBtn");
 const openSheetBtn = document.getElementById("openSheetBtn");
 const tableBody = document.querySelector("#dataTable tbody");
 const tableWrapper = document.getElementById("tableWrapper");
+const statusMessage = document.getElementById("statusMessage");
 
 let currentProfileData = null;
 const STORAGE_KEY = "linkedin_profiles";
@@ -24,6 +25,25 @@ function isValidProfilePage(url) {
     }
 }
 
+/* ---------- CHECK EXISTENCE ---------- */
+
+function checkIfAlreadyAdded(profileUrl) {
+    chrome.storage.local.get([STORAGE_KEY], (result) => {
+        const profiles = result[STORAGE_KEY] || [];
+        const exists = profiles.some(p => p.profileUrl === profileUrl);
+
+        if (exists) {
+            statusMessage.textContent = "Already added in sheet ✅";
+            statusMessage.classList.add("success");
+            addToSheetBtn.disabled = true;
+        } else {
+            statusMessage.textContent = "";
+            statusMessage.classList.remove("success");
+            addToSheetBtn.disabled = false;
+        }
+    });
+}
+
 /* ---------- RENDER PROFILE ---------- */
 
 function renderProfile(data) {
@@ -38,8 +58,9 @@ function renderProfile(data) {
   `;
 
     addToSheetBtn.style.display = "block";
-    addToSheetBtn.disabled = false;
     currentProfileData = data;
+
+    checkIfAlreadyAdded(data.profileUrl);
 }
 
 /* ---------- ERROR ---------- */
@@ -53,6 +74,7 @@ function renderError() {
   `;
 
     addToSheetBtn.style.display = "none";
+    statusMessage.textContent = "";
     currentProfileData = null;
 }
 
@@ -77,35 +99,26 @@ function loadStoredProfiles() {
         tableBody.innerHTML = "";
 
         const latestThree = profiles.slice(-3).reverse();
-
         latestThree.forEach(profile => addRowToTable(profile));
     });
 }
 
-/* ---------- SAVE PROFILE ---------- */
+/* ---------- SAVE ---------- */
 
 function saveProfile(profile) {
-    if (!profile || !profile.profileUrl || !profile.name) {
-        alert("Invalid profile data.");
-        return;
-    }
+    if (!profile || !profile.profileUrl || !profile.name) return;
 
     chrome.storage.local.get([STORAGE_KEY], (result) => {
         const profiles = result[STORAGE_KEY] || [];
-
         const exists = profiles.some(p => p.profileUrl === profile.profileUrl);
-        if (exists) {
-            alert("Profile already added!");
-            tableWrapper.style.display = "block";
-            loadStoredProfiles();
-            return;
-        }
+        if (exists) return;
 
         profiles.push(profile);
 
         chrome.storage.local.set({ [STORAGE_KEY]: profiles }, () => {
-            tableWrapper.style.display = "block"; // show table AFTER add
+            tableWrapper.style.display = "block";
             loadStoredProfiles();
+            checkIfAlreadyAdded(profile.profileUrl);
         });
     });
 }
@@ -151,6 +164,6 @@ openSheetBtn.addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     addToSheetBtn.style.display = "none";
-    tableWrapper.style.display = "none"; // hidden initially
+    tableWrapper.style.display = "none";
     loadProfile();
 });

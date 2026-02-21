@@ -4,6 +4,36 @@
 <head>
     <title>Profile Extractor</title>
     <link rel="stylesheet" href="popup.css" />
+    <style>
+        .status-message {
+            margin: 10px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .success {
+            color: #1a7f37;
+        }
+
+        .open-sheet-btn {
+            margin-top: 12px;
+            width: 100%;
+            padding: 9px;
+            background: #ffffff;
+            border: 2px solid #0a66c2;
+            color: #0a66c2;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s ease;
+        }
+
+        .open-sheet-btn:hover {
+            background: #0a66c2;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,9 +48,14 @@
             <p>Loading profile data...</p>
         </div>
 
-        <button id="addToSheetBtn" class="sheet-btn" disabled>Add to Sheet</button>
+        <!-- Status Above Button -->
+        <div id="statusMessage" class="status-message"></div>
 
-        <!-- Table Wrapper -->
+        <button id="addToSheetBtn" class="sheet-btn" disabled>
+            Add to Sheet
+        </button>
+
+        <!-- Hidden Table -->
         <div id="tableWrapper" style="display: none;">
             <div class="table-container">
                 <table id="dataTable">
@@ -36,9 +71,12 @@
                     <tbody></tbody>
                 </table>
             </div>
-
-            <button id="openSheetBtn" class="open-sheet-btn">Open in Sheet</button>
         </div>
+
+        <!-- Renamed + Styled -->
+        <button id="openSheetBtn" class="open-sheet-btn">
+            Open Sheet
+        </button>
 
     </div>
 
