@@ -9,18 +9,26 @@ const statusMessage = document.getElementById("statusMessage");
 let currentProfileData = null;
 const STORAGE_KEY = "linkedin_profiles";
 
-/* ---------- PROFILE URL CHECK ---------- */
+/* ---------- PROFILE URL CHECK (FIXED & STRONG) ---------- */
 
 function isValidProfilePage(url) {
     if (!url) return false;
 
     try {
         const parsed = new URL(url);
+
+        // Must be linkedin domain
         if (!parsed.hostname.includes("linkedin.com")) return false;
 
-        const profileRegex = /^\/(in|pub)\/[a-zA-Z0-9\-_%]+\/?$/;
-        return profileRegex.test(parsed.pathname);
-    } catch {
+        // Clean pathname (remove trailing slash)
+        const path = parsed.pathname.replace(/\/$/, "");
+
+        // Accept numeric usernames properly
+        const profileRegex = /^\/(in|pub)\/[a-zA-Z0-9\-_%]+$/;
+
+        return profileRegex.test(path);
+
+    } catch (error) {
         return false;
     }
 }
@@ -48,14 +56,14 @@ function checkIfAlreadyAdded(profileUrl) {
 
 function renderProfile(data) {
     profileContainer.innerHTML = `
-    <div class="profile-card">
-      <div class="profile-name">${data.name || "-"}</div>
-      <div class="profile-headline">${data.headline || "-"}</div>
-      <div><strong>Email:</strong> ${data.email || "-"}</div>
-      <div><strong>Phone:</strong> ${data.phone || "-"}</div>
-      <div><strong>Profile URL:</strong> ${data.profileUrl || "-"}</div>
-    </div>
-  `;
+        <div class="profile-card">
+            <div class="profile-name"><strong>${data.name || "-"}</strong></div>
+            <div class="profile-headline">${data.headline || "-"}</div>
+            <div><strong>Email:</strong> ${data.email || "-"}</div>
+            <div><strong>Phone:</strong> ${data.phone || "-"}</div>
+            <div><strong>Profile URL:</strong> ${data.profileUrl || "-"}</div>
+        </div>
+    `;
 
     addToSheetBtn.style.display = "block";
     currentProfileData = data;
@@ -67,11 +75,11 @@ function renderProfile(data) {
 
 function renderError() {
     profileContainer.innerHTML = `
-    <div class="profile-card">
-      <p>Not a LinkedIn profile page.</p>
-      <p>Please open a valid profile like /in/username</p>
-    </div>
-  `;
+        <div class="profile-card">
+            <p>Not a LinkedIn profile page.</p>
+            <p>Please open a valid profile like /in/username</p>
+        </div>
+    `;
 
     addToSheetBtn.style.display = "none";
     statusMessage.textContent = "";
@@ -83,12 +91,12 @@ function renderError() {
 function addRowToTable(data) {
     const row = document.createElement("tr");
     row.innerHTML = `
-    <td>${data.name || ""}</td>
-    <td>${data.headline || ""}</td>
-    <td>${data.email || ""}</td>
-    <td>${data.phone || ""}</td>
-    <td><a href="${data.profileUrl}" target="_blank">Link</a></td>
-  `;
+        <td>${data.name || ""}</td>
+        <td>${data.headline || ""}</td>
+        <td>${data.email || ""}</td>
+        <td>${data.phone || ""}</td>
+        <td><a href="${data.profileUrl}" target="_blank">Link</a></td>
+    `;
     tableBody.appendChild(row);
 }
 
@@ -127,7 +135,9 @@ function saveProfile(profile) {
 
 function loadProfile() {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        const currentUrl = tabs[0]?.url;
+
+        const tab = tabs[0];
+        const currentUrl = tab?.url;
 
         if (!isValidProfilePage(currentUrl)) {
             renderError();
@@ -135,9 +145,10 @@ function loadProfile() {
         }
 
         chrome.tabs.sendMessage(
-            tabs[0].id,
+            tab.id,
             { action: "getProfileData" },
             function (response) {
+
                 if (chrome.runtime.lastError || !response || !response.name) {
                     renderError();
                     return;
