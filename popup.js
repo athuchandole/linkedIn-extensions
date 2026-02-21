@@ -3,23 +3,21 @@ const reloadBtn = document.getElementById("reloadBtn");
 const addToSheetBtn = document.getElementById("addToSheetBtn");
 const openSheetBtn = document.getElementById("openSheetBtn");
 const tableBody = document.querySelector("#dataTable tbody");
+const tableWrapper = document.getElementById("tableWrapper");
 
 let currentProfileData = null;
 const STORAGE_KEY = "linkedin_profiles";
 
-/* ---------- STRONG PROFILE URL CHECK ---------- */
+/* ---------- PROFILE URL CHECK ---------- */
 
 function isValidProfilePage(url) {
     if (!url) return false;
 
     try {
         const parsed = new URL(url);
-
         if (!parsed.hostname.includes("linkedin.com")) return false;
 
-        // Match /in/username OR /pub/username
         const profileRegex = /^\/(in|pub)\/[a-zA-Z0-9\-_%]+\/?$/;
-
         return profileRegex.test(parsed.pathname);
     } catch {
         return false;
@@ -79,6 +77,7 @@ function loadStoredProfiles() {
         tableBody.innerHTML = "";
 
         const latestThree = profiles.slice(-3).reverse();
+
         latestThree.forEach(profile => addRowToTable(profile));
     });
 }
@@ -97,12 +96,15 @@ function saveProfile(profile) {
         const exists = profiles.some(p => p.profileUrl === profile.profileUrl);
         if (exists) {
             alert("Profile already added!");
+            tableWrapper.style.display = "block";
+            loadStoredProfiles();
             return;
         }
 
         profiles.push(profile);
 
         chrome.storage.local.set({ [STORAGE_KEY]: profiles }, () => {
+            tableWrapper.style.display = "block"; // show table AFTER add
             loadStoredProfiles();
         });
     });
@@ -149,6 +151,6 @@ openSheetBtn.addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     addToSheetBtn.style.display = "none";
+    tableWrapper.style.display = "none"; // hidden initially
     loadProfile();
-    loadStoredProfiles();
 });
